@@ -1,53 +1,132 @@
-# Zidio M1 - Premium Video Conferencing & Real-Time Transcription
+# IntellMeet – AI-Powered Video Conferencing & Real-Time Transcription
 
 ## System Overview
-Zidio M1 is a modern, high-performance web application designed to facilitate secure video conferencing with real-time, shared speech-to-text transcription. The application utilizes a serverless backend architecture via Firebase Cloud Functions and a deeply customized WebRTC video pipeline powered by Agora.
 
-### Core Capabilities
-1. **Video & Audio Conferencing**: Multi-party WebRTC video calls with dynamic layout adjustment.
-2. **Real-Time Speech Transcription Architecture**: 
-   - **Local Recognition**: The `useSpeechTranscription.js` hook interfaces directly with the browser's native `webkitSpeechRecognition` API. It captures continuous speech, differentiating between *interim* (in-progress) and *final* (completed) phrases.
-   - **P2P Synchronization**: To share these captions instantly, the `TranscriptChannel` wrapper leverages the **Agora Real-Time Messaging (RTM)** SDK (v1.5.1). It establishes a side-channel that broadcasts both `interim` and `final` JSON payloads to all connected peers in less than 100ms.
-   - **UI Rendering**: The `TranscriptPanel.jsx` component elegantly displays final sentences chronologically, while floating interim text in real-time as users speak, attributing each sentence to the correct speaker via UID mappings.
-3. **Persistent Meeting Records**: Upon leaving a call, the aggregated transcript array and meeting metadata are automatically synced to Firebase Firestore (`/meetings/{meetingId}`) for permanent storage and post-meeting review.
-4. **Professional Pre-Join Lobby**: A dedicated hardware-selection layer allowing users to preview video and select specific camera/microphone IDs before negotiating the WebRTC connection.
-5. **Screen Sharing**: Secure, sandboxed native screen sharing capabilities using dedicated Agora video tracks.
+**IntellMeet** is a modern, high-performance web application designed to provide secure video conferencing with real-time, shared speech-to-text transcription. The application uses a serverless backend powered by Firebase Cloud Functions and a highly optimized WebRTC communication pipeline built with Agora.
 
 ---
 
-## Technical Architecture
+## Core Capabilities
 
-The application strictly separates its infrastructure into a client-side React SPA and a serverless Node.js backend.
+### Video & Audio Conferencing
 
-### Technology Stack
-- **Frontend Framework**: React 19 + Vite
-- **Routing**: React Router v7
-- **Video / Audio Pipeline**: Agora RTC SDK (`agora-rtc-sdk-ng` v4.x)
-- **Real-Time Messaging**: Agora RTM SDK (`agora-rtm-sdk` v1.5.1)
-- **Database & Auth**: Firebase (Auth, Firestore)
-- **Serverless Backend**: Firebase Cloud Functions (Node.js 20, 2nd Gen)
-- **Styling**: Vanilla CSS (Strict CSS Tokens, Glassmorphism, Monochromatic Dark Mode)
+* Multi-party WebRTC video conferencing with adaptive participant layouts.
+* High-quality audio and video communication powered by the Agora RTC SDK.
 
-### Security & Authentication Flow
-To maintain strict security over WebRTC connections, the frontend never exposes raw Agora certificates.
-1. The React client makes a request to `/api/token?channel={channelId}&uid={numericUid}`.
-2. Firebase Hosting natively rewrites `/api/token` to the 2nd Gen Cloud Function `agoraToken`.
-3. The Cloud Function securely signs and generates an `rtcToken` (for video) and an `rtmToken` (for messaging) using the `agora-token` library.
-4. The client uses these secure tokens to initialize the Agora client pipelines.
+### Real-Time Speech Transcription Architecture
+
+#### Local Speech Recognition
+
+The `useSpeechTranscription.js` hook communicates directly with the browser's native `webkitSpeechRecognition` API to capture continuous speech. It distinguishes between:
+
+* **Interim transcripts** (live speech currently being recognized)
+* **Final transcripts** (completed and confirmed speech)
+
+#### Peer-to-Peer Transcript Synchronization
+
+To instantly share captions with all participants, the `TranscriptChannel` wrapper uses the **Agora Real-Time Messaging (RTM) SDK (v1.5.1)**. It establishes a dedicated messaging channel that broadcasts both interim and final transcript data as lightweight JSON payloads with sub-100ms latency.
+
+#### Transcript Rendering
+
+The `TranscriptPanel.jsx` component displays:
+
+* Final transcript messages in chronological order
+* Floating interim captions while users are speaking
+* Automatic speaker attribution using Agora UID mappings
+
+#### Persistent Meeting Records
+
+When a meeting ends, the complete transcript history and meeting metadata are automatically stored in **Firebase Firestore** (`/meetings/{meetingId}`), enabling future review and record keeping.
+
+### Professional Pre-Join Lobby
+
+A dedicated pre-join experience allows users to:
+
+* Preview camera before joining
+* Select preferred camera
+* Select preferred microphone
+* Verify hardware before establishing the WebRTC connection
+
+### Screen Sharing
+
+Secure native screen sharing using dedicated Agora screen video tracks.
 
 ---
 
-## System Requirements & Local Setup
+# Technical Architecture
 
-### Environment Variables
-To run this project locally, you must create a `.env` file in the root directory.
+The application follows a clean separation between the frontend React application and a serverless Firebase backend.
+
+---
+
+# Technology Stack
+
+### Frontend
+
+* React 19
+* Vite
+* React Router v7
+
+### Real-Time Communication
+
+* Agora RTC SDK (`agora-rtc-sdk-ng v4.x`)
+* Agora RTM SDK (`agora-rtm-sdk v1.5.1`)
+
+### Backend
+
+* Firebase Cloud Functions (Node.js 20, 2nd Generation)
+
+### Database & Authentication
+
+* Firebase Authentication
+* Firebase Firestore
+
+### Styling
+
+* Vanilla CSS
+* CSS Design Tokens
+* Glassmorphism UI
+* Premium Monochromatic Dark Theme
+
+---
+
+# Security & Authentication Flow
+
+To ensure secure WebRTC communication, **IntellMeet** never exposes Agora certificates to the client.
+
+### Authentication Flow
+
+1. The React frontend requests:
+
+```
+/api/token?channel={channelId}&uid={numericUid}
+```
+
+2. Firebase Hosting automatically rewrites the request to the **2nd Generation Firebase Cloud Function** `agoraToken`.
+
+3. The Cloud Function securely generates:
+
+* RTC Token (Video & Audio)
+* RTM Token (Real-Time Messaging)
+
+using the **agora-token** library.
+
+4. The client initializes both Agora RTC and RTM services using the generated secure tokens.
+
+---
+
+# System Requirements & Local Setup
+
+## Environment Variables
+
+Create a `.env` file in the project root.
 
 ```env
-# Agora Configuration (Required for video/audio processing)
+# Agora Configuration
 VITE_AGORA_APP_ID="your_agora_app_id"
 VITE_AGORA_APP_CERTIFICATE="your_agora_app_certificate"
 
-# Firebase Configuration (Required for DB/Auth routing)
+# Firebase Configuration
 VITE_FIREBASE_API_KEY="your_api_key"
 VITE_FIREBASE_AUTH_DOMAIN="your_auth_domain"
 VITE_FIREBASE_PROJECT_ID="your_project_id"
@@ -56,28 +135,121 @@ VITE_FIREBASE_MESSAGING_SENDER_ID="your_messaging_sender_id"
 VITE_FIREBASE_APP_ID="your_app_id"
 ```
 
-### Installation Instructions
+---
+
+# Installation
+
+## Install Dependencies
 
 ```bash
-# 1. Install frontend dependencies
 npm install
+```
 
-# 2. Start the Vite development server
+## Start Development Server
+
+```bash
 npm run dev
+```
 
-# 3. (Optional) Run Firebase Emulators for backend token logic
+## Run Firebase Emulators (Optional)
+
+```bash
 npm run serve
 ```
 
 ---
 
-## Codebase Navigation (LLM Context)
+# Codebase Navigation (Developer & AI Assistant Reference)
 
-For AI assistants or developers analyzing this repository, the core logic is distributed as follows:
+### `src/hooks/useAgoraClient.js`
 
-- `src/hooks/useAgoraClient.js`: The heart of the WebRTC integration. Manages local track initialization (camera, mic, screen), handles remote participant subscriptions, and maintains the `remoteUsers` state array.
-- `src/hooks/useSpeechTranscription.js`: Interfaces directly with the browser's `SpeechRecognition` API. Handles interim results, finalizes sentences, and manages microphone permission states.
-- `src/services/transcriptService.js`: Contains `TranscriptChannel`, a class wrapper around the Agora RTM SDK. It handles the bidirectional broadcast of transcript chunks to remote participants.
-- `src/components/VideoCall.jsx`: The orchestration layer. It bridges the token fetching, WebRTC client, and transcript messaging into a single cohesive UI.
-- `functions/index.js`: The 2nd Gen Firebase Cloud Function responsible for cryptographic token generation. Strictly requires `agora-token` v2.0+ argument signatures.
-- `src/index.css`: The central design system. Employs CSS custom properties (`--bg`, `--glass-bg`) to enforce a premium, Apple-inspired dark mode aesthetic globally.
+Core WebRTC integration layer.
+
+Responsibilities include:
+
+* Local camera initialization
+* Microphone management
+* Screen sharing
+* Remote participant subscription
+* Maintaining the `remoteUsers` state
+
+---
+
+### `src/hooks/useSpeechTranscription.js`
+
+Interfaces directly with the browser Speech Recognition API.
+
+Responsibilities:
+
+* Continuous speech recognition
+* Interim transcript generation
+* Final transcript generation
+* Microphone permission management
+
+---
+
+### `src/services/transcriptService.js`
+
+Contains the `TranscriptChannel` wrapper around the Agora RTM SDK.
+
+Responsibilities:
+
+* Sending transcript updates
+* Receiving transcript updates
+* Synchronizing live captions between participants
+
+---
+
+### `src/components/VideoCall.jsx`
+
+Primary orchestration component.
+
+Responsible for connecting:
+
+* Secure token generation
+* Agora RTC
+* Agora RTM
+* Speech transcription
+* Meeting UI
+
+into a unified conferencing experience.
+
+---
+
+### `functions/index.js`
+
+Firebase Cloud Function (2nd Generation).
+
+Responsibilities:
+
+* Secure Agora token generation
+* RTC token creation
+* RTM token creation
+
+Requires **agora-token v2.0+**.
+
+---
+
+### `src/index.css`
+
+Global design system.
+
+Implements:
+
+* CSS Custom Properties
+* Dark Theme
+* Glassmorphism
+* Premium UI Tokens
+* Consistent Apple-inspired visual language throughout the application.
+
+---
+
+# Developer
+
+**Aazim Khursheed**
+
+* **GitHub:** https://github.com/Aazimkhursheed
+* **LinkedIn:** https://www.linkedin.com/in/aazim-khursheed-203304294/
+
+If you found this project useful or interesting, feel free to connect with me on LinkedIn or explore more of my work on GitHub.
+

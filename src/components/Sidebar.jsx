@@ -9,7 +9,7 @@ export default function Sidebar() {
     <nav className="sidebar">
       <div className="sidebar-brand">
         <svg width="28" height="28" viewBox="0 0 256 256" fill="var(--accent)"><path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,160H40V56H216V200Zm-88-88H80V80a8,8,0,0,1,16,0v24h32a8,8,0,0,1,0,16Z"></path></svg>
-        <span>Zidio Meet</span>
+        <span>IntellMeet</span>
       </div>
 
       <div className="sidebar-links">

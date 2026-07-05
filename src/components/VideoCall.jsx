@@ -17,7 +17,10 @@ export default function VideoCall({ channelName, user, onLeave }) {
   useEffect(() => {
     async function fetchTokens() {
       try {
-        const res = await fetch(`/api/token?channel=${channelName}&uid=${uidNumeric}`);
+        // const res = await fetch(`/api/token?channel=${channelName}&uid=${uidNumeric}`);
+        const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/token?channel=${channelName}&uid=${uidNumeric}`
+      );
         if (!res.ok) {
           throw new Error(`Server returned ${res.status}`);
         }

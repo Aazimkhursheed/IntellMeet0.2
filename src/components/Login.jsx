@@ -21,14 +21,14 @@ export default function Login() {
       <div className="login-hero">
         <h1 className="login-title">Premium video meetings. Now free for everyone.</h1>
         <p className="login-subtitle">
-          Connect, collaborate, and celebrate from anywhere with Zidio.
+          Connect, collaborate, and celebrate from anywhere with IntellMeet.
         </p>
       </div>
       
       <div className="login-auth">
         <div className="login-glass-card">
           <div className="login-brand">
-            Zidio
+            IntellMeet
           </div>
           <h2>Welcome Back</h2>
           <p>Sign in to your account to continue</p>

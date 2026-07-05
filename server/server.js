@@ -15,7 +15,7 @@ const APP_ID = process.env.AGORA_APP_ID;
 const APP_CERTIFICATE = process.env.AGORA_APP_CERTIFICATE;
 
 if (!APP_ID || !APP_CERTIFICATE) {
-  console.error("❌ Missing AGORA_APP_ID or AGORA_APP_CERTIFICATE in server/.env");
+  console.error(" Missing AGORA_APP_ID or AGORA_APP_CERTIFICATE in server/.env");
   process.exit(1);
 }
 
@@ -68,5 +68,5 @@ app.get("/api/token", (req, res) => {
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`🚀 Token server running on http://localhost:${PORT}`);
+  console.log(` Token server running on http://localhost:${PORT}`);
 });

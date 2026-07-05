@@ -2,254 +2,346 @@
 
 ## System Overview
 
-**IntellMeet** is a modern, high-performance web application designed to provide secure video conferencing with real-time, shared speech-to-text transcription. The application uses a serverless backend powered by Firebase Cloud Functions and a highly optimized WebRTC communication pipeline built with Agora.
+**IntellMeet** is a modern, AI-powered video conferencing platform that enables secure real-time meetings with live speech-to-text transcription, screen sharing, and persistent meeting history. The application combines **React**, **Agora RTC/RTM**, **Firebase Authentication**, **Cloud Firestore**, and a secure **Express.js token server** to deliver a seamless collaboration experience.
 
 ---
 
-## Core Capabilities
+# Features
 
-### Video & Audio Conferencing
+## Video & Audio Conferencing
 
-* Multi-party WebRTC video conferencing with adaptive participant layouts.
-* High-quality audio and video communication powered by the Agora RTC SDK.
+- Multi-party HD video conferencing powered by Agora RTC.
+- Adaptive participant layouts.
+- Camera and microphone controls.
+- Mute/Unmute functionality.
+- Leave meeting support.
 
-### Real-Time Speech Transcription Architecture
+## Real-Time Speech Transcription
 
-#### Local Speech Recognition
+### Live Speech Recognition
 
-The `useSpeechTranscription.js` hook communicates directly with the browser's native `webkitSpeechRecognition` API to capture continuous speech. It distinguishes between:
+The application uses the browser's native Speech Recognition API to continuously capture speech.
 
-* **Interim transcripts** (live speech currently being recognized)
-* **Final transcripts** (completed and confirmed speech)
+It supports:
 
-#### Peer-to-Peer Transcript Synchronization
+- Live (interim) transcription
+- Final confirmed transcription
+- Speaker identification
 
-To instantly share captions with all participants, the `TranscriptChannel` wrapper uses the **Agora Real-Time Messaging (RTM) SDK (v1.5.1)**. It establishes a dedicated messaging channel that broadcasts both interim and final transcript data as lightweight JSON payloads with sub-100ms latency.
+### Real-Time Transcript Synchronization
 
-#### Transcript Rendering
+Transcript updates are shared instantly between participants using the Agora RTM SDK.
 
-The `TranscriptPanel.jsx` component displays:
+Features include:
 
-* Final transcript messages in chronological order
-* Floating interim captions while users are speaking
-* Automatic speaker attribution using Agora UID mappings
+- Live caption synchronization
+- Speaker mapping
+- Low-latency transcript delivery
 
-#### Persistent Meeting Records
+### Transcript Storage
 
-When a meeting ends, the complete transcript history and meeting metadata are automatically stored in **Firebase Firestore** (`/meetings/{meetingId}`), enabling future review and record keeping.
-
-### Professional Pre-Join Lobby
-
-A dedicated pre-join experience allows users to:
-
-* Preview camera before joining
-* Select preferred camera
-* Select preferred microphone
-* Verify hardware before establishing the WebRTC connection
-
-### Screen Sharing
-
-Secure native screen sharing using dedicated Agora screen video tracks.
+Meeting transcripts are automatically stored in Firebase Cloud Firestore after meetings for future reference.
 
 ---
 
-# Technical Architecture
+## Pre-Join Lobby
 
-The application follows a clean separation between the frontend React application and a serverless Firebase backend.
+Before entering a meeting, users can:
+
+- Preview camera
+- Select microphone
+- Select camera
+- Verify hardware availability
+
+---
+
+## Screen Sharing
+
+Supports native screen sharing using Agora screen tracks.
 
 ---
 
 # Technology Stack
 
-### Frontend
+## Frontend
 
-* React 19
-* Vite
-* React Router v7
+- React 19
+- Vite
+- React Router v7
 
-### Real-Time Communication
+## Backend
 
-* Agora RTC SDK (`agora-rtc-sdk-ng v4.x`)
-* Agora RTM SDK (`agora-rtm-sdk v1.5.1`)
+- Node.js
+- Express.js
+- dotenv
+- CORS
 
-### Backend
+## Real-Time Communication
 
-* Firebase Cloud Functions (Node.js 20, 2nd Generation)
+- Agora RTC SDK
+- Agora RTM SDK
+- Agora Token SDK
 
-### Database & Authentication
+## Authentication
 
-* Firebase Authentication
-* Firebase Firestore
+- Firebase Authentication (Google Sign-In)
 
-### Styling
+## Database
 
-* Vanilla CSS
-* CSS Design Tokens
-* Glassmorphism UI
-* Premium Monochromatic Dark Theme
+- Firebase Cloud Firestore
 
----
+## Styling
 
-# Security & Authentication Flow
-
-To ensure secure WebRTC communication, **IntellMeet** never exposes Agora certificates to the client.
-
-### Authentication Flow
-
-1. The React frontend requests:
-
-```
-/api/token?channel={channelId}&uid={numericUid}
-```
-
-2. Firebase Hosting automatically rewrites the request to the **2nd Generation Firebase Cloud Function** `agoraToken`.
-
-3. The Cloud Function securely generates:
-
-* RTC Token (Video & Audio)
-* RTM Token (Real-Time Messaging)
-
-using the **agora-token** library.
-
-4. The client initializes both Agora RTC and RTM services using the generated secure tokens.
+- Vanilla CSS
+- Glassmorphism UI
+- Dark Theme
 
 ---
 
-# System Requirements & Local Setup
+# Architecture
 
-## Environment Variables
+```text
+React (Vite)
+        │
+        ▼
+Express Token Server
+        │
+        ▼
+Agora Token Generation
+        │
+        ▼
+Agora RTC + RTM
+        │
+        ▼
+Firebase Authentication
+        │
+        ▼
+Cloud Firestore
+```
 
-Create a `.env` file in the project root.
+---
+
+# Security
+
+The Agora App Certificate is never exposed to the client.
+
+The frontend requests secure meeting tokens from the Express backend.
+
+```http
+GET /api/token?channel=<channel>&uid=<uid>
+```
+
+The Express server securely generates:
+
+- RTC Token
+- RTM Token
+
+using the Agora Token SDK and returns them to the client.
+
+---
+
+# Project Structure
+
+```text
+IntellMeet/
+│
+├── public/
+├── server/
+│   ├── server.js
+│   ├── package.json
+│   └── .env
+│
+├── src/
+│   ├── components/
+│   ├── hooks/
+│   ├── services/
+│   ├── config/
+│   └── styles/
+│
+├── .env
+├── package.json
+├── vite.config.js
+└── README.md
+```
+
+---
+
+# Environment Variables
+
+## Frontend (.env)
 
 ```env
-# Agora Configuration
-VITE_AGORA_APP_ID="your_agora_app_id"
-VITE_AGORA_APP_CERTIFICATE="your_agora_app_certificate"
+VITE_FIREBASE_API_KEY=your_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_bucket
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
 
-# Firebase Configuration
-VITE_FIREBASE_API_KEY="your_api_key"
-VITE_FIREBASE_AUTH_DOMAIN="your_auth_domain"
-VITE_FIREBASE_PROJECT_ID="your_project_id"
-VITE_FIREBASE_STORAGE_BUCKET="your_storage_bucket"
-VITE_FIREBASE_MESSAGING_SENDER_ID="your_messaging_sender_id"
-VITE_FIREBASE_APP_ID="your_app_id"
+VITE_AGORA_APP_ID=your_agora_app_id
+VITE_API_URL=http://localhost:5000
+VITE_AGORA_TEMP_TOKEN=
+```
+
+---
+
+## Backend (server/.env)
+
+```env
+PORT=5000
+
+AGORA_APP_ID=your_agora_app_id
+AGORA_APP_CERTIFICATE=your_agora_app_certificate
 ```
 
 ---
 
 # Installation
 
-## Install Dependencies
+## Clone the Repository
+
+```bash
+git clone https://github.com/Aazimkhursheed/IntellMeet0.2.git
+```
+
+## Navigate to the Project Directory
+
+```bash
+cd IntellMeet0.2
+```
+
+## Install Frontend Dependencies
 
 ```bash
 npm install
 ```
 
-## Start Development Server
+## Install Backend Dependencies
+
+```bash
+cd server
+npm install
+```
+
+---
+
+# Running the Project
+
+## Terminal 1 – Frontend
 
 ```bash
 npm run dev
 ```
 
-## Run Firebase Emulators (Optional)
+Runs on:
 
-```bash
-npm run serve
+```text
+http://localhost:5173
 ```
 
 ---
 
-# Codebase Navigation (Developer & AI Assistant Reference)
+## Terminal 2 – Backend
+
+```bash
+cd server
+npm start
+```
+
+Runs on:
+
+```text
+http://localhost:5000
+```
+
+---
+
+# Core Components
 
 ### `src/hooks/useAgoraClient.js`
 
-Core WebRTC integration layer.
+Responsible for:
 
-Responsibilities include:
-
-* Local camera initialization
-* Microphone management
-* Screen sharing
-* Remote participant subscription
-* Maintaining the `remoteUsers` state
+- Camera initialization
+- Microphone management
+- Remote participant subscription
+- Screen sharing
+- Agora RTC lifecycle
 
 ---
 
 ### `src/hooks/useSpeechTranscription.js`
 
-Interfaces directly with the browser Speech Recognition API.
+Responsible for:
 
-Responsibilities:
-
-* Continuous speech recognition
-* Interim transcript generation
-* Final transcript generation
-* Microphone permission management
+- Browser Speech Recognition API
+- Interim transcripts
+- Final transcripts
+- Speech processing
 
 ---
 
 ### `src/services/transcriptService.js`
 
-Contains the `TranscriptChannel` wrapper around the Agora RTM SDK.
+Responsible for:
 
-Responsibilities:
-
-* Sending transcript updates
-* Receiving transcript updates
-* Synchronizing live captions between participants
+- Agora RTM communication
+- Transcript synchronization
+- Real-time caption broadcasting
 
 ---
 
 ### `src/components/VideoCall.jsx`
 
-Primary orchestration component.
+Responsible for:
 
-Responsible for connecting:
-
-* Secure token generation
-* Agora RTC
-* Agora RTM
-* Speech transcription
-* Meeting UI
-
-into a unified conferencing experience.
+- Meeting creation
+- Meeting joining
+- Secure token retrieval
+- Agora RTC integration
+- Agora RTM integration
+- Live transcription
 
 ---
 
-### `functions/index.js`
+### `server/server.js`
 
-Firebase Cloud Function (2nd Generation).
+Responsible for:
 
-Responsibilities:
-
-* Secure Agora token generation
-* RTC token creation
-* RTM token creation
-
-Requires **agora-token v2.0+**.
+- RTC token generation
+- RTM token generation
+- Secure Agora authentication
+- Express API endpoints
 
 ---
 
-### `src/index.css`
+# Future Improvements
 
-Global design system.
-
-Implements:
-
-* CSS Custom Properties
-* Dark Theme
-* Glassmorphism
-* Premium UI Tokens
-* Consistent Apple-inspired visual language throughout the application.
+- Meeting recording
+- AI meeting summaries
+- Calendar integration
+- Meeting scheduling
+- Team collaboration
+- File sharing
+- User profiles
+- Meeting analytics
 
 ---
 
 # Developer
 
-**Aazim Khursheed**
+## Aazim Khursheed
 
-* **GitHub:** https://github.com/Aazimkhursheed
-* **LinkedIn:** https://www.linkedin.com/in/aazim-khursheed-203304294/
+Computer Science Engineering Student | MERN Stack Developer | AI Enthusiast
 
-If you found this project useful or interesting, feel free to connect with me on LinkedIn or explore more of my work on GitHub.
+### GitHub
 
+https://github.com/Aazimkhursheed
+
+### LinkedIn
+
+https://www.linkedin.com/in/aazim-khursheed-203304294/
+
+---
+
+If you found this project helpful, consider starring the repository and feel free to connect with me on LinkedIn.

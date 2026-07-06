@@ -328,6 +328,50 @@ Responsible for:
 
 ---
 
+# IntellMeet – AI-Powered Video Conferencing & Real-Time Transcription
+
+![React](https://img.shields.io/badge/React-19-blue?logo=react)
+![Vite](https://img.shields.io/badge/Vite-Frontend-purple?logo=vite)
+![Firebase](https://img.shields.io/badge/Firebase-Authentication-orange?logo=firebase)
+![Agora](https://img.shields.io/badge/Agora-RTC-blue)
+![Express](https://img.shields.io/badge/Express-Backend-black?logo=express)
+![License](https://img.shields.io/badge/License-MIT-green)
+
+##  Live Demo
+
+**Frontend**
+
+https://intell-meet0-2.vercel.app
+
+**Backend API**
+
+https://intellmeet-backend-b02u.onrender.com
+
+---
+
+## Overview
+
+IntellMeet is a full-stack AI-powered video conferencing platform that enables secure online meetings with Google Authentication, real-time communication, live speech transcription, screen sharing, and persistent meeting history.
+
+Built using React, Vite, Firebase Authentication, Agora RTC/RTM, Express.js, and Cloud Firestore, IntellMeet delivers a modern collaboration experience similar to Google Meet while showcasing full-stack MERN development skills.
+
+---
+
+## Key Features
+
+- Google Authentication using Firebase
+- Secure Video Conferencing using Agora RTC
+- Real-time Messaging using Agora RTM
+- Live Speech-to-Text Transcription
+- Screen Sharing
+- Meeting Code Generation
+- Join Existing Meetings
+- Meeting History
+- Cloud Firestore Integration
+- Responsive Dark UI
+- Secure Express Token Server
+
+
 # Developer
 
 ## Aazim Khursheed

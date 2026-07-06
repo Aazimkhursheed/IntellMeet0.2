@@ -51,32 +51,89 @@ export function useSpeechTranscription({ enabled, speakerName, onFinalLine, onIn
       }
     };
 
-    recognition.onerror = (event) => {
-      console.error('Speech recognition error', event.error);
-      if (event.error === 'not-allowed') {
-        enabledRef.current = false;
-        setError('Microphone permission blocked. Please allow it in your browser settings.');
-      } else if (event.error === 'no-speech') {
-        // Just no speech detected, ignore
-      } else if (event.error === 'audio-capture') {
-        setError('No microphone was found. Ensure it is plugged in.');
-        enabledRef.current = false;
-      } else {
-        setError(`Transcription error: ${event.error}`);
-      }
-    };
 
-    recognition.onend = () => {
-      // Browser SpeechRecognition stops automatically after silence.
-      // We must restart it if it's still supposed to be enabled.
-      if (enabledRef.current) {
-        try {
-          recognition.start();
-        } catch (e) {
-          // Ignore restart errors
-        }
-      }
-    };
+      recognition.onerror = (event) => {
+    console.error("Speech recognition error:", event.error);
+
+    switch (event.error) {
+      case "not-allowed":
+        enabledRef.current = false;
+        setError(
+          "Microphone permission blocked. Please allow microphone access."
+        );
+        break;
+
+      case "audio-capture":
+        enabledRef.current = false;
+        setError("No microphone detected.");
+        break;
+
+      case "no-speech":
+        // Ignore.
+        break;
+
+      case "network":
+        // Chrome/Brave occasionally throw this.
+        // Let onend restart recognition.
+        console.warn("Speech recognition network issue. Restarting...");
+        break;
+
+      default:
+        console.warn("Speech recognition:", event.error);
+        break;
+    }
+  };
+    // recognition.onerror = (event) => {
+    //   console.error('Speech recognition error', event.error);
+    //   if (event.error === 'not-allowed') {
+    //     enabledRef.current = false;
+    //     setError('Microphone permission blocked. Please allow it in your browser settings.');
+    //   } else if (event.error === 'no-speech') {
+    //     // Just no speech detected, ignore
+    //   } else if (event.error === 'audio-capture') {
+    //     setError('No microphone was found. Ensure it is plugged in.');
+    //     enabledRef.current = false;
+    //   } else {
+    //     setError(`Transcription error: ${event.error}`);
+    //   }
+    // };
+
+let restartTimer;
+
+recognition.onend = () => {
+  if (!enabledRef.current) return;
+
+  restartTimer = setTimeout(() => {
+    try {
+      recognition.start();
+    } catch (err) {
+      // Ignore
+    }
+  }, 800);
+};
+
+return () => {
+  recognition.onend = null;
+
+  if (restartTimer) {
+    clearTimeout(restartTimer);
+  }
+
+  if (recognitionRef.current) {
+    recognitionRef.current.stop();
+  }
+};
+    // recognition.onend = () => {
+    //   // Browser SpeechRecognition stops automatically after silence.
+    //   // We must restart it if it's still supposed to be enabled.
+    //   if (enabledRef.current) {
+    //     try {
+    //       recognition.start();
+    //     } catch (e) {
+    //       // Ignore restart errors
+    //     }
+    //   }
+    // };
 
     recognitionRef.current = recognition;
 
